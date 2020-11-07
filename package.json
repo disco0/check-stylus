@@ -1,0 +1,42 @@
+{
+  "name": "check-stylus",
+  "version": "1.0.0",
+  "description": "Utility script for displaying stylus compillation info to terminal",
+  "main": "index.js",
+  "bin": {
+    "check-stylus": "./dist/check-stylus.js"
+  },
+  "scripts": {
+    "build:watch": "tsc -watch -p ./tsconfig.json",
+    "build:compile": "tsc -watch -p ./tsconfig.json",
+    "watch": "yarn build:watch",
+    "build": "yarn build:compile",
+    "pre:relink": "yarn build",
+    "relink": "npm link",
+    "relink:global-npm": "nvm deactivate 2>/dev/null && yarn relink"
+  },
+  "keywords": [
+    "stylus"
+  ],
+  "author": "disk0",
+  "license": "ISC",
+  "module": "./dist/index.js",
+  "files": [
+    "ts",
+    "tsconfig.json",
+    "dist"
+  ],
+  "type": "commonjs",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "helpful-decorators": "^2.1.0",
+    "stylus": "^0.54.8",
+    "stylus-stylus": "file:../stylus-stylus",
+    "yargs": "^16.1.0"
+  },
+  "devDependencies": {
+    "@types/stylus": "^0.48.33",
+    "@types/watch": "^1.0.1",
+    "@types/yargs": "^15.0.9"
+  }
+}

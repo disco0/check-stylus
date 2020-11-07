@@ -1,0 +1,68 @@
+{
+    "version": "2.0.0",
+    "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "group": "build",
+        "revealProblems": "onProblem",
+        "showReuseMessage": true,
+        "clear": false
+    },
+    "tasks": [
+        {
+            "type": "npm",
+            "script": "relink:global-npm",
+            "problemMatcher": [],
+            "label": "npm: relink:global-npm",
+            "detail": "nvm deactivate 2>/dev/null && yarn relink",
+            "options": {
+              "statusbar": {
+                "label": "Relink Globally",
+                "filePattern": ".*",
+                "hide": false
+              }
+            }
+        },
+        {
+            "type": "npm",
+            "script": "watch",
+            "label": "watch",
+
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            
+            "problemMatcher": 
+            [
+                "$tsc-watch",
+            ],
+
+            "isBackground": true,
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "filePattern": "(.*\\.ts|tsconfig.*)",
+                    "label": "Watch"
+                },
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": 
+            {
+                "reveal":           "never",
+                "clear":            false,
+                "echo":             true,
+                "focus":            false,
+                "group":            "build",
+                "panel":            "dedicated",
+                "revealProblems":   "onProblem",
+                "showReuseMessage": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        }
+    ]
+}
