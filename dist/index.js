@@ -10,10 +10,13 @@ const log_1 = require("./log");
 const StylusSource_1 = require("./StylusSource");
 const watcher_1 = require("./watcher");
 //#region Parse Options
+function stringWithChars(obj) {
+    return typeof obj === 'string' && obj.length > 0;
+}
 const stylusSourcePathRegex = /\.styl$/;
 const stylusSourcePaths = yargs_1.options['any-file']
-    ? yargs_1.options._.filter(arg => arg.length > 0 && fs_1.existsSync(arg))
-    : yargs_1.options._.filter(arg => stylusSourcePathRegex.test(arg));
+    ? yargs_1.options._.filter(stringWithChars).filter(arg => fs_1.existsSync(arg))
+    : yargs_1.options._.filter(stringWithChars).filter(arg => stylusSourcePathRegex.test(arg));
 {
     const fileCount = stylusSourcePaths.length;
     log_1.debugLog(chalk_1.default.ansi256(17) `Compiling ${fileCount} files:` +
