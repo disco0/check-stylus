@@ -9,12 +9,17 @@ import { watchStylusFile } from './watcher'
 
 //#region Parse Options
 
+function stringWithChars(obj: unknown): obj is string
+{
+    return typeof obj === 'string' && obj.length > 0
+}
+
 const stylusSourcePathRegex = /\.styl$/
 
 const stylusSourcePaths = 
     options['any-file'] 
-        ? options._.filter(arg => arg.length > 0 && existsSync(arg))
-        : options._.filter(arg => stylusSourcePathRegex.test(arg));
+        ? options._.filter(stringWithChars).filter(arg => existsSync(arg))
+        : options._.filter(stringWithChars).filter(arg => stylusSourcePathRegex.test(arg));
 
 {
     const fileCount = stylusSourcePaths.length;

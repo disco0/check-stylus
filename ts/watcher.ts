@@ -1,12 +1,19 @@
+//#region Import
+
+// Node
 import type * as fs from 'fs'
 
+// npm
 import { watch } from 'chokidar'
 import type * as Chokidar from 'chokidar'
-
 import c from 'chalk'
 
 import { debugLog } from './log'
+import { options } from './yargs'
 import { StylusSource } from './StylusSource';
+import utils from './util';
+
+//#endregion Import
 
 type OnChange = <T extends Chokidar.FSWatcher>(this: T | unknown, path: string, stats?: fs.Stats) => void;
 
@@ -18,11 +25,19 @@ const watchConfig: Chokidar.WatchOptions =
     followSymlinks: true,
     depth: 1,
     disableGlobbing: true, 
-    // awaitWriteFinish: true,
+    awaitWriteFinish: false,
     ignorePermissionErrors: true,
     persistent: true,
     atomic: true,
-    ignored: /^\./, 
+    ignored: /^\./,
+    alwaysStat: true,
+    ignoreInitial: false,
+    interval: 150,
+    cwd: utils.cwd,
+    
+    ...utils.os.isDarwin() ? { } : {
+        useFsEvents: false
+    }
     
     // ... options['any-file'] ? { ignored: '!*.styl' } : { },
 }
@@ -53,7 +68,12 @@ const compileOnChange: OnChange = (path, stat) =>
 
     // TODO: This is probably not that efficient, maybe just make a single instance or one per
     //       file.
-    const compiler = new StylusSource(path);
-    
-    compiler.outputResult(compiler.compile());
+    const compiler = new StylusSource(path, options['nocss'] ?? false);
+
+    (result => {
+        // if(options.nocss)
+        //     return
+        // else
+            compiler.outputResult(result)
+    })(compiler.compile())
 };

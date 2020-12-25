@@ -1,47 +1,37 @@
 //#region Import
+
+// Node
 import * as fs from 'fs'
 
+// npm
+import c = require('chalk')
 import stylus = require('stylus')
 type Stylus = typeof stylus;
 import stylusStylus = require('stylus-stylus')
 
-import c = require('chalk')
-
 import { escapeRegex } from './regex'
 import * as styles from './chalks'
+import { debugLog } from './log'
 import { displayCompileError } from './error'
+import { options } from './yargs'
 
 //#endregion Import
 
+//#region Compilation Paths
+
+// TODO: Add directory of each file being watched to paths
+
+const renderPaths = [ ];
+
+if(options.paths) renderPaths.push(...options.paths);
+
+//#endregion Compilation Paths
+
 //#region Errors
 
-export interface StylusRenderErrorOptions extends Error
-{
-    stack: string
-    message: string
-    // fromStylus: boolean
-    lineno: number
-    column: number
-    filename: string
-    stylusStack: string
-}
-
-export type StylusRenderError = StylusRenderErrorOptions
-
-export class StylusCallbackParameters
-{
-    css?:   string
-    js?:    string
-    error?: Error
-}
-
-export interface StylusError extends Error
-{
-    message: string
-    filename?: string
-    lineno?:  number
-    columns?:  number
-}
+export import StylusRenderErrorOptions = Stylus.errors.RenderErrorOptions
+export import StylusRenderError = Stylus.errors.RenderError
+export import StylusError = Stylus.errors.StylusError
 
 export class StylusSourceError implements Error
 {
@@ -54,12 +44,12 @@ export class StylusSourceError implements Error
     stylusStack: string | '';
     source: StylusRenderError;
     context?: string;
-
-    // fromStylus: boolean
+    
     constructor(error: Error)
     {
         const stylusError = error as StylusRenderError;
-        // Why isn't Object.assign working smh
+
+        // TypeScript typechecker can't handle Object.assign working smh
         this.source      = stylusError as StylusRenderError;
         this.stack       = stylusError.stack
         this.message     = stylusError.message
@@ -67,13 +57,12 @@ export class StylusSourceError implements Error
         this.column      = stylusError.column
         this.filename    = stylusError.filename
         this.stylusStack = stylusError.stylusStack
-        // this.fromStylus  = error.fromStylus
-        let context = StylusSourceError.extractRawContextFromStack(this.stack, this.message)
-        if(context && this.stack.length > context.length)
-        {
-            this.context = context.replace(/^[\t ]+/gm, '');
-        }
+        // this.fromStylus  = stylusError.fromStylus
 
+        let context = StylusSourceError.extractRawContextFromStack(this.stack, this.message)
+
+        if(context && this.stack.length > context.length)
+            this.context = context.replace(/^[\t ]+/gm, '');
     }
 
     //#region Util
@@ -88,19 +77,40 @@ export class StylusSourceError implements Error
 
 //#endregion Errors
 
+const stylusRendererOptions: RenderOptions = 
+{
+    paths: renderPaths
+};
+
+if(Object.keys(stylusRendererOptions).length > 0)
+    debugLog(styles.debug`Stylus Render Options:\n${
+                                        JSON.stringify(stylusRendererOptions, null, 4)}`)
+
+
 //#region Stylus Class
 
 export class StylusSource
 {
-    path:             string
-    compilerInstance: ReturnType<Stylus>
+    static readonly noEmitCSSInitial: boolean = options['nocss'] ?? false;
 
-    constructor(sourcePath: string)
+    path:             string;
+    compilerInstance: ReturnType<Stylus>;
+
+    constructor(sourcePath: string, public noEmitCSS: boolean = StylusSource.noEmitCSSInitial)
     {
+        // Idiot check
+        // TODO: Consider throwing error here, as this is kind of important and 
+        //       in theory a file watcher should not fuck this up
+        if(!(fs.existsSync(sourcePath) && fs.statSync(sourcePath).isFile()))
+        {
+            const errorString = `StylusSource Constructor: Source path passed in constructor does not exist or is not a file: ${sourcePath}`
+            debugLog(styles.warn(errorString));
+        }
         this.path = sourcePath;
 
         // Create a new compiler instance that can be continued later
-        this.compilerInstance = stylus(this.source).use(stylusStylus())
+        // this.compilerInstance = newStylusRendererInstance(this.source);
+        this.compilerInstance = StylusSource.CreateRenderer(this.source);
     }
 
     //#region File Source Content
@@ -130,6 +140,7 @@ export class StylusSource
         }
         else
         {
+            debugLog(`Returning cached compilation.`)
             source = this.#sourceCache;
         }
 
@@ -204,22 +215,114 @@ export class StylusSource
         }
         else
         {
-            console.log(`${c.underline(this.path.split(/[\\\/]/).slice(-1)[0].replace(/styl$/,'css')) + ':'}`);
+            // If --nocss passed, don't print css and heading
+            if(this.noEmitCSS)
+            {
+                // TODO: Keep something like this, or just output nothing for --nocss?
+                console.log(styles.debug(`Compiled: ${c.underline.ansi256(21).dim(this.filename)}`))
+                return
+            }
+            console.log(`${c.underline(this.filename.replace(/styl$/,'css')) + ':'}`);
             console.log(result);
         }
     }
     
     //#endregion Compilation
+
+    //#region Util
+
+    #filenameCache: Partial<Record<'path' | 'value', string>> = {}
+
+    get filename(): string
+    {
+        //#region Cache
+
+        if(
+            this.#filenameCache.path === this.path 
+            && typeof this.#filenameCache.value === 'string'
+            && this.#filenameCache.value.length > 0          )
+            return this.#filenameCache.value;
+
+        //#endregion Cache
+        
+        const value = this.path.split(/[\/]|(?<!([\\]{2})*[\\])[\\]/).slice(-1)[0]
+
+        // Cache value and the path its resolved from
+        Object.assign(this.#filenameCache, {value, path: this.path});
+
+        return value
+    }
+    
+    //#endregion Util
+
+    //#region Static Methods
+
+    static CreateRenderer(stylusSource: string | undefined = ''): Stylus.Renderer
+    {
+        // Create
+        const instance = stylus(stylusSource, stylusRendererOptions)
+
+        // Load plugins
+        instance.use(stylusStylus());
+
+        return instance;
+    }
+
+    // TODO: Decide on where to put this, either here just the object
+    static get RendererOptions()
+    {
+        return stylusRendererOptions   
+    }
+
+    static get RendererPaths()
+    {
+        return stylusRendererOptions.paths || [ ];
+    }
+    
+    //#endregion Static Methods
 }
 
 //#endregion Stylus Class
 
 //#region Declarations
 
-declare namespace Stylus.Renderer
+declare namespace Stylus
 {
-    export type RenderCallback = (err: StylusRenderError | null, css: string, js: string) => void;
-    export function render(callback: RenderCallback): void
+    export type Renderer = ReturnType<typeof stylus>
+    export type RenderOptions = Parameters<typeof stylus>[1]
+
+    export namespace Renderer
+    {
+        export type RenderCallback = 
+            (err: StylusRenderError | null, css: string, js: string) => void;
+        export function render(callback: RenderCallback): void
+    }
+
+    export namespace errors
+    {
+        export type RenderError = StylusRenderErrorOptions
+
+        export interface RenderErrorOptions extends Error
+        {
+            stack: string
+            message: string
+            // fromStylus: boolean
+            lineno: number
+            column: number
+            filename: string
+            stylusStack: string
+        }
+
+        export interface StylusError extends Error
+        {
+            message: string
+            filename?: string
+            lineno?:  number
+            columns?:  number
+        }
+    }
 }
+
+import RenderOptions = Stylus.RenderOptions
 
 //#endregion Declarations
