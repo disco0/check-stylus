@@ -1,6 +1,16 @@
 {
-    "workbench.colorCustomizations": {
-      "[WinClassic]": {}
-    },
+    "editor.tokenColorCustomizations": {"[WinClassic]": {"textMateRules": [
+        { 
+            "name": "Markdown Language Code Block",
+            "scope": [
+                "markup.fenced_code.block.markdown punctuation.definition.markdown"
+            ],
+            "settings": {
+                "foreground": "#FF0000",
+                "fontStyle": "bold"
+            }
+        }
+
+    ]}}
     // "tasks.statusbar.default.hide": false
 }
