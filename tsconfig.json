@@ -10,21 +10,23 @@
         "experimentalDecorators": true,
         "rootDir": "ts",
         "outDir": "./dist",
+
+        "forceConsistentCasingInFileNames": true,
+        
         "noErrorTruncation": true,
 
-        "typeRoots": [ "../node_modules/@types/" ],
+        "typeRoots": [ "./node_modules/@types/" ],
 
-        "module": "commonjs",
-        "target": "es2019",
         "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "pretty": true,
-        "listEmittedFiles": true,
         "allowSyntheticDefaultImports": true,
         "allowUmdGlobalAccess": true,
-        "moduleResolution": "node",
+
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+
+        "pretty": true,
+        "listEmittedFiles": true,
+        "preserveWatchOutput": true,
     },
 
     "ts-node": 
