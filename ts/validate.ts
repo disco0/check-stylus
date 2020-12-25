@@ -108,7 +108,6 @@ export class StylusSource
     
     //#endregion File Source Content
 
-
     //#region Compilation
 
     #cssCache?: string;
@@ -158,8 +157,6 @@ export class StylusSource
 
 //#endregion Stylus Class
 
-
-
 const compilations = stylusSourcePaths.map(path => new StylusSource(path))
 
 for(const instance of compilations)
@@ -184,9 +181,4 @@ for(const instance of compilations)
         console.log(`${c.underline(instance.path.split(/[\\\/]/).slice(-1)[0].replace(/styl$/,'css')) + ':'}`)
         console.log(compilation)
     }
-
-
-
 }
-
-

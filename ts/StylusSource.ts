@@ -86,7 +86,6 @@ if(Object.keys(stylusRendererOptions).length > 0)
     debugLog(styles.debug`Stylus Render Options:\n${
                                         JSON.stringify(stylusRendererOptions, null, 4)}`)
 
-
 //#region Stylus Class
 
 export class StylusSource
