@@ -29,12 +29,14 @@
   "type": "commonjs",
   "dependencies": {
     "chalk": "^4.1.0",
+    "chokidar": "^3.4.3",
     "helpful-decorators": "^2.1.0",
-    "stylus": "^0.54.8",
-    "stylus-stylus": "file:../stylus-stylus",
+    "stylus": "github:disco0/stylus#dev",
+    "stylus-stylus": "github:disco0/stylus-stylus",
     "yargs": "^16.1.0"
   },
   "devDependencies": {
+    "@tsconfig/node12": "^1.0.7",
     "@types/stylus": "^0.48.33",
     "@types/watch": "^1.0.1",
     "@types/yargs": "^15.0.9"
