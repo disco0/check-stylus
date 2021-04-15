@@ -34,8 +34,8 @@ const watchConfig = {
     // ... options['any-file'] ? { ignored: '!*.styl' } : { },
 };
 function watchStylusFile(...filePaths) {
-    log_1.debugLog(chalk_1.default.ansi256(32) `Watching files:` + filePaths.map((filePath) => `\n - ${filePath}`).join(''));
-    const instance = chokidar_1.watch(filePaths, watchConfig)
+    (0, log_1.debugLog)(chalk_1.default.ansi256(32) `Watching files:` + filePaths.map((filePath) => `\n - ${filePath}`).join(''));
+    const instance = (0, chokidar_1.watch)(filePaths, watchConfig)
         .on('add', compileOnChange)
         .on('change', compileOnChange);
     if (!instance)
@@ -49,7 +49,7 @@ const compileOnChange = (path, stat) => {
     var _a;
     if (stat && !stat.isFile())
         return;
-    log_1.debugLog(`Compiling file: ${chalk_1.default.underline.blue(path)}`);
+    (0, log_1.debugLog)(`Compiling file: ${chalk_1.default.underline.blue(path)}`);
     // TODO: This is probably not that efficient, maybe just make a single instance or one per
     //       file.
     const compiler = new StylusSource_1.StylusSource(path, (_a = yargs_1.options['nocss']) !== null && _a !== void 0 ? _a : false);

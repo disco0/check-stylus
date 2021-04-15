@@ -15,14 +15,14 @@ const watchOptions = {
     persistent: true
 };
 const onChange = (path, stat) => console.log(`[change] ${chalk_1.default.underline.blue(path)}`);
-let testDir = path_1.resolve(((_b = (_a = process_1.env.HOME) !== null && _a !== void 0 ? _a : process_1.env.HOMEPATH) !== null && _b !== void 0 ? _b : os_1.homedir()), '.tmp');
-let testFiles = [path_1.resolve(testDir, 'tmp.styl')];
+let testDir = (0, path_1.resolve)(((_b = (_a = process_1.env.HOME) !== null && _a !== void 0 ? _a : process_1.env.HOMEPATH) !== null && _b !== void 0 ? _b : (0, os_1.homedir)()), '.tmp');
+let testFiles = [(0, path_1.resolve)(testDir, 'tmp.styl')];
 testFiles.forEach(filePath => {
-    if (!fs_1.existsSync(filePath))
+    if (!(0, fs_1.existsSync)(filePath))
         throw new Error('File does not exist:' + filePath);
 });
 console.log(`Input:${testFiles.map(file => `\n ->> ${chalk_1.default.ansi256(32)(file)}`)}`);
-const watcher = chokidar_1.watch(testFiles, watchOptions)
+const watcher = (0, chokidar_1.watch)(testFiles, watchOptions)
     .on('add', onChange)
     .on('change', onChange);
 const watched = Object.entries(watcher.getWatched()).flatMap(([dir, files]) => files.map(file => dir + '/' + file));
