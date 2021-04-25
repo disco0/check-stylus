@@ -28,17 +28,18 @@
   ],
   "type": "commonjs",
   "dependencies": {
-    "chalk": "^4.1.0",
-    "chokidar": "^3.4.3",
+    "chalk": "^4.1.1",
+    "chokidar": "^3.5.1",
     "helpful-decorators": "^2.1.0",
     "stylus": "github:disco0/stylus#dev",
     "stylus-stylus": "github:disco0/stylus-stylus",
-    "yargs": "^16.1.0"
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "@tsconfig/node12": "^1.0.7",
-    "@types/stylus": "^0.48.33",
+    "@tsconfig/node14": "^1.0.0",
+    "@types/stylus": "^0.48.34",
     "@types/watch": "^1.0.1",
-    "@types/yargs": "^15.0.9"
+    "@types/yargs": "^16.0.1"
   }
 }
