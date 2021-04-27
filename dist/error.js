@@ -28,7 +28,7 @@ const { entries } = Object;
 //#endregion Import
 exports.defaultIndent = 0;
 function displayCompileError(error, indent = exports.defaultIndent) {
-    naturalNumber_1.assertNaturalNumber(indent);
+    (0, naturalNumber_1.assertNaturalNumber)(indent);
     const errMsg = [
         styles.error `Errors during compilation:`,
         ...[

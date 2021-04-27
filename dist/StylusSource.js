@@ -19,21 +19,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
 var _a;
-var _sourceCache, _cssCache, _lastCompilationResult, _filenameCache;
+var _StylusSource_sourceCache, _StylusSource_cssCache, _StylusSource_lastCompilationResult, _StylusSource_filenameCache;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StylusSource = exports.StylusSourceError = void 0;
 // Node
@@ -71,7 +69,7 @@ class StylusSourceError {
     }
     //#region Util
     static extractRawContextFromStack(stack, message) {
-        return stack.replace(RegExp('^Error: +[\\s\\n]*' + regex_1.escapeRegex(message) + '\\n*', 'gm'), '');
+        return stack.replace(RegExp('^Error: +[\\s\\n]*' + (0, regex_1.escapeRegex)(message) + '\\n*', 'gm'), '');
     }
 }
 exports.StylusSourceError = StylusSourceError;
@@ -80,26 +78,26 @@ const stylusRendererOptions = {
     paths: renderPaths
 };
 if (Object.keys(stylusRendererOptions).length > 0)
-    log_1.debugLog(styles.debug `Stylus Render Options:\n${JSON.stringify(stylusRendererOptions, null, 4)}`);
+    (0, log_1.debugLog)(styles.debug `Stylus Render Options:\n${JSON.stringify(stylusRendererOptions, null, 4)}`);
 //#region Stylus Class
 class StylusSource {
     constructor(sourcePath, noEmitCSS = StylusSource.noEmitCSSInitial) {
         this.noEmitCSS = noEmitCSS;
         //#region File Source Content
-        _sourceCache.set(this, void 0);
+        _StylusSource_sourceCache.set(this, void 0);
         //#endregion File Source Content
         //#region Compilation
-        _cssCache.set(this, void 0);
-        _lastCompilationResult.set(this, void 0);
+        _StylusSource_cssCache.set(this, void 0);
+        _StylusSource_lastCompilationResult.set(this, void 0);
         //#endregion Compilation
         //#region Util
-        _filenameCache.set(this, {});
+        _StylusSource_filenameCache.set(this, {});
         // Idiot check
         // TODO: Consider throwing error here, as this is kind of important and 
         //       in theory a file watcher should not fuck this up
         if (!(fs.existsSync(sourcePath) && fs.statSync(sourcePath).isFile())) {
             const errorString = `StylusSource Constructor: Source path passed in constructor does not exist or is not a file: ${sourcePath}`;
-            log_1.debugLog(styles.warn(errorString));
+            (0, log_1.debugLog)(styles.warn(errorString));
         }
         this.path = sourcePath;
         // Create a new compiler instance that can be continued later
@@ -112,10 +110,10 @@ class StylusSource {
          * infer that #sourceCache was narrowed to string type
          */
         let source;
-        if (typeof __classPrivateFieldGet(this, _sourceCache) === 'undefined' || force === true) {
+        if (typeof __classPrivateFieldGet(this, _StylusSource_sourceCache, "f") === 'undefined' || force === true) {
             try {
                 source = fs.readFileSync(this.path, "utf8");
-                __classPrivateFieldSet(this, _sourceCache, source);
+                __classPrivateFieldSet(this, _StylusSource_sourceCache, source, "f");
                 console.debug(styles.debug `Sucessfully loaded and stored content of source file ${this.path}.`);
             }
             catch (err) {
@@ -124,22 +122,22 @@ class StylusSource {
             }
         }
         else {
-            log_1.debugLog(`Returning cached compilation.`);
-            source = __classPrivateFieldGet(this, _sourceCache);
+            (0, log_1.debugLog)(`Returning cached compilation.`);
+            source = __classPrivateFieldGet(this, _StylusSource_sourceCache, "f");
         }
         return source;
     }
     get source() { return this.loadSource(); }
     compile(force) {
-        if (typeof __classPrivateFieldGet(this, _cssCache) === 'string' && __classPrivateFieldGet(this, _cssCache).length > 0 && !force)
-            return __classPrivateFieldGet(this, _cssCache);
+        if (typeof __classPrivateFieldGet(this, _StylusSource_cssCache, "f") === 'string' && __classPrivateFieldGet(this, _StylusSource_cssCache, "f").length > 0 && !force)
+            return __classPrivateFieldGet(this, _StylusSource_cssCache, "f");
         try {
             let result = undefined;
             let errors = undefined;
             this.compilerInstance.render((error, css, js) => {
                 if (null !== error)
                     errors = new StylusSourceError(error);
-                __classPrivateFieldSet(this, _lastCompilationResult, ({ error: error, css, js }));
+                __classPrivateFieldSet(this, _StylusSource_lastCompilationResult, ({ error: error, css, js }), "f");
                 if (css)
                     result = css;
                 if (error)
@@ -147,7 +145,7 @@ class StylusSource {
             });
             if (result) {
                 console.debug(styles.debug `Sucessfully compiled and cached result.`);
-                __classPrivateFieldSet(this, _cssCache, result);
+                __classPrivateFieldSet(this, _StylusSource_cssCache, result, "f");
                 return result;
             }
             else {
@@ -166,7 +164,7 @@ class StylusSource {
     }
     outputResult(result) {
         if (typeof result !== 'string') {
-            error_1.displayCompileError(result);
+            (0, error_1.displayCompileError)(result);
         }
         else {
             // If --nocss passed, don't print css and heading
@@ -181,14 +179,14 @@ class StylusSource {
     }
     get filename() {
         //#region Cache
-        if (__classPrivateFieldGet(this, _filenameCache).path === this.path
-            && typeof __classPrivateFieldGet(this, _filenameCache).value === 'string'
-            && __classPrivateFieldGet(this, _filenameCache).value.length > 0)
-            return __classPrivateFieldGet(this, _filenameCache).value;
+        if (__classPrivateFieldGet(this, _StylusSource_filenameCache, "f").path === this.path
+            && typeof __classPrivateFieldGet(this, _StylusSource_filenameCache, "f").value === 'string'
+            && __classPrivateFieldGet(this, _StylusSource_filenameCache, "f").value.length > 0)
+            return __classPrivateFieldGet(this, _StylusSource_filenameCache, "f").value;
         //#endregion Cache
         const value = this.path.split(/[\/]|(?<!([\\]{2})*[\\])[\\]/).slice(-1)[0];
         // Cache value and the path its resolved from
-        Object.assign(__classPrivateFieldGet(this, _filenameCache), { value, path: this.path });
+        Object.assign(__classPrivateFieldGet(this, _StylusSource_filenameCache, "f"), { value, path: this.path });
         return value;
     }
     //#endregion Util
@@ -209,6 +207,6 @@ class StylusSource {
     }
 }
 exports.StylusSource = StylusSource;
-_sourceCache = new WeakMap(), _cssCache = new WeakMap(), _lastCompilationResult = new WeakMap(), _filenameCache = new WeakMap();
+_StylusSource_sourceCache = new WeakMap(), _StylusSource_cssCache = new WeakMap(), _StylusSource_lastCompilationResult = new WeakMap(), _StylusSource_filenameCache = new WeakMap();
 StylusSource.noEmitCSSInitial = (_a = yargs_1.options['nocss']) !== null && _a !== void 0 ? _a : false;
 //#endregion Declarations

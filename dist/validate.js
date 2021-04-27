@@ -18,24 +18,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 var _a;
-var _sourceCache, _cssCache;
+var _StylusSource_sourceCache, _StylusSource_cssCache;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StylusSource = exports.IndentedLog = void 0;
 const fs = __importStar(require("fs"));
@@ -75,13 +73,13 @@ exports.IndentedLog = IndentedLog;
 class StylusSource {
     constructor(sourcePath) {
         //#region File Source Content
-        _sourceCache.set(this, void 0);
+        _StylusSource_sourceCache.set(this, void 0);
         //#endregion File Source Content
         //#region Compilation
-        _cssCache.set(this, void 0);
+        _StylusSource_cssCache.set(this, void 0);
         this.path = sourcePath;
         // Create a new compiler instance that can be continued later
-        this.compilerInstance = stylus_1.default(this.source);
+        this.compilerInstance = (0, stylus_1.default)(this.source);
     }
     loadSource(force) {
         /**
@@ -89,10 +87,10 @@ class StylusSource {
          * infer that #sourceCache was narrowed to string type
          */
         let source;
-        if (typeof __classPrivateFieldGet(this, _sourceCache) === 'undefined' || force === true) {
+        if (typeof __classPrivateFieldGet(this, _StylusSource_sourceCache, "f") === 'undefined' || force === true) {
             try {
                 source = fs.readFileSync(this.path, "utf8");
-                __classPrivateFieldSet(this, _sourceCache, source);
+                __classPrivateFieldSet(this, _StylusSource_sourceCache, source, "f");
                 console.debug(`Sucessfully loaded and stored content of source file ${this.path}.`);
             }
             catch (err) {
@@ -101,14 +99,14 @@ class StylusSource {
             }
         }
         else {
-            source = __classPrivateFieldGet(this, _sourceCache);
+            source = __classPrivateFieldGet(this, _StylusSource_sourceCache, "f");
         }
         return source;
     }
     get source() { return this.loadSource(); }
     compile(force) {
-        if (typeof __classPrivateFieldGet(this, _cssCache) === 'string' && __classPrivateFieldGet(this, _cssCache).length > 0 && !force)
-            return __classPrivateFieldGet(this, _cssCache);
+        if (typeof __classPrivateFieldGet(this, _StylusSource_cssCache, "f") === 'string' && __classPrivateFieldGet(this, _StylusSource_cssCache, "f").length > 0 && !force)
+            return __classPrivateFieldGet(this, _StylusSource_cssCache, "f");
         try {
             let result = undefined;
             let errors = undefined;
@@ -120,7 +118,7 @@ class StylusSource {
             });
             if (result) {
                 console.debug(`Sucessfully compiled and cached result.`);
-                __classPrivateFieldSet(this, _cssCache, result);
+                __classPrivateFieldSet(this, _StylusSource_cssCache, result, "f");
                 return result;
             }
             else {
@@ -139,7 +137,7 @@ class StylusSource {
     }
 }
 exports.StylusSource = StylusSource;
-_sourceCache = new WeakMap(), _cssCache = new WeakMap();
+_StylusSource_sourceCache = new WeakMap(), _StylusSource_cssCache = new WeakMap();
 //#endregion Stylus Class
 const compilations = stylusSourcePaths.map(path => new StylusSource(path));
 for (const instance of compilations) {

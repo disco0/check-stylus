@@ -15,16 +15,16 @@ function stringWithChars(obj) {
 }
 const stylusSourcePathRegex = /\.styl$/;
 const stylusSourcePaths = yargs_1.options['any-file']
-    ? yargs_1.options._.filter(stringWithChars).filter(arg => fs_1.existsSync(arg))
+    ? yargs_1.options._.filter(stringWithChars).filter(arg => (0, fs_1.existsSync)(arg))
     : yargs_1.options._.filter(stringWithChars).filter(arg => stylusSourcePathRegex.test(arg));
 {
     const fileCount = stylusSourcePaths.length;
-    log_1.debugLog(chalk_1.default.ansi256(17) `Compiling ${fileCount} files:` +
+    (0, log_1.debugLog)(chalk_1.default.ansi256(17) `Compiling ${fileCount} files:` +
         `\n ${chalk_1.default.ansi256(248) `>`} %s`.repeat(fileCount), ...stylusSourcePaths.map(file => chalk_1.default.bold.ansi256(4).underline `${file}`));
 }
 //#endregion Parse Options
 if (yargs_1.options.watch)
-    watcher_1.watchStylusFile(...stylusSourcePaths);
+    (0, watcher_1.watchStylusFile)(...stylusSourcePaths);
 else {
     const compilations = stylusSourcePaths.map(path => new StylusSource_1.StylusSource(path));
     for (const instance of compilations) {
